@@ -1,0 +1,8 @@
+extends Node
+
+var playerBody: CharacterBody2D
+
+# So enemy can find player zone.
+var playerDamageZone: Area2D
+
+var playerDamageAmount: int
