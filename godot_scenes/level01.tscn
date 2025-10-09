@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=4 uid="uid://dw8nxxmyiyqsq"]
+[gd_scene load_steps=6 format=4 uid="uid://dw8nxxmyiyqsq"]
 
 [ext_resource type="Texture2D" uid="uid://da4ywao6l30y8" path="res://temp_godot_assets/Capstone Temp Tilemap Assets.png" id="1_xogxq"]
 [ext_resource type="PackedScene" uid="uid://bhosfiv432aow" path="res://godot_scenes/player.tscn" id="2_t2i47"]
+[ext_resource type="PackedScene" uid="uid://gvfid00infq5" path="res://temp_enemy.tscn" id="3_fc0fs"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_t2i47"]
 texture = ExtResource("1_xogxq")
@@ -62,3 +63,6 @@ tile_map_data = PackedByteArray("AAD7/woAAAAAAAIAAAD8/woAAAAAAAIAAAD9/woAAAAAAAI
 tile_set = SubResource("TileSet_fc0fs")
 
 [node name="Player" parent="." instance=ExtResource("2_t2i47")]
+
+[node name="simple_enemy" parent="." instance=ExtResource("3_fc0fs")]
+position = Vector2(89, 145)

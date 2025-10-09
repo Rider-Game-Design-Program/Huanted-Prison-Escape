@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://bhosfiv432aow"]
+[gd_scene load_steps=22 format=3 uid="uid://bhosfiv432aow"]
 
 [ext_resource type="Script" uid="uid://c4m4duv44a011" path="res://godot_scenes/player.gd" id="1_5jnm2"]
 [ext_resource type="Texture2D" uid="uid://55hci4htmjuy" path="res://Godot Art Assets/PrisonerSpriteShee.png" id="2_5jnm2"]
+[ext_resource type="Texture2D" uid="uid://cqr1vk61j40cc" path="res://Godot Art Assets/PrisonerPunch.png" id="3_gktdc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gktdc"]
 atlas = ExtResource("2_5jnm2")
@@ -22,6 +23,46 @@ region = Rect2(192, 0, 64, 64)
 [sub_resource type="AtlasTexture" id="AtlasTexture_gy88a"]
 atlas = ExtResource("2_5jnm2")
 region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_80o10"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j6hwm"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dspoy"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w6s7j"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qwol6"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6x7j1"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ak21x"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b2ocu"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mo6n2"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(512, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wirug"]
+atlas = ExtResource("3_gktdc")
+region = Rect2(576, 0, 64, 64)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_gktdc"]
 animations = [{
@@ -44,24 +85,72 @@ animations = [{
 "loop": true,
 "name": &"Idle",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_80o10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j6hwm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dspoy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w6s7j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qwol6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6x7j1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ak21x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b2ocu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mo6n2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wirug")
+}],
+"loop": false,
+"name": &"Single_Attack",
+"speed": 18.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pajen"]
-size = Vector2(23, 51)
+size = Vector2(29, 54)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5jnm2"]
+radius = 7.0
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_5jnm2")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_gktdc")
-animation = &"Idle"
-frame = 2
-frame_progress = 0.257468
+animation = &"Single_Attack"
+frame = 9
+frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(1.5, 5.5)
+position = Vector2(1.5, 4)
 shape = SubResource("RectangleShape2D_pajen")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(1.5, 1.5)
 position_smoothing_enabled = true
+
+[node name="AttackArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
+position = Vector2(24, 3)
+shape = SubResource("CircleShape2D_5jnm2")
+disabled = true
+debug_color = Color(0.84992, 0.262824, 0.669002, 0.42)
+
+[connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
