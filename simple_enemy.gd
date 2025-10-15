@@ -3,7 +3,7 @@ extends CharacterBody2D
 const SPEED = 50
 var dir: Vector2
 
-var health = 50
+var health = 24
 var health_max = 50
 var health_min = 0
 

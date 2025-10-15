@@ -78,6 +78,10 @@ func handle_movement_animation(direction):
 	if is_on_floor() and !current_attack: # If player is on the ground and not currently attacking
 		if !velocity: # If the player is not moving
 			$AnimatedSprite2D.play("Idle")
+		elif velocity: # If the player is moving.
+			$AnimatedSprite2D.play("Walk")
+	elif !is_on_floor() and !current_attack: # Plays if the character is in the air AND not attacking.
+		$AnimatedSprite2D.play("Jump")
 
 # Function Handles flipping the player sprite based off the direction the player is facing.
 func flip_sprite(direction):
