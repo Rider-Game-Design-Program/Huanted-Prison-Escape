@@ -18,6 +18,10 @@ config/icon="res://icon.svg"
 
 Global="*res://global.gd"
 
+[global_group]
+
+Player="Player Node"
+
 [input]
 
 Right={

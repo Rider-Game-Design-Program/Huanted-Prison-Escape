@@ -11,6 +11,7 @@ var current_attack: bool
 # Gets the value of gravity from project settings to be synced with Rigidbody2D nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
+# Runs every frame.
 func _ready() -> void:
 	Global.playerBody = self
 	current_attack = false

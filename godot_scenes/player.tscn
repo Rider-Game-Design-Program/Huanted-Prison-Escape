@@ -238,14 +238,12 @@ size = Vector2(29, 54)
 [sub_resource type="CircleShape2D" id="CircleShape2D_5jnm2"]
 radius = 7.0
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["Player"]]
 script = ExtResource("1_5jnm2")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_gktdc")
-animation = &"Jump"
-frame = 8
-frame_progress = 0.931356
+animation = &"Walk"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(1.5, 4)
