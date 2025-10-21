@@ -52,6 +52,9 @@ func _on_enemy_hitbox_area_entered(area: Area2D) -> void:
 		var damage = Global.playerDamageAmount
 		take_damage(damage)
 
+func _on_enemy_hitbox_area_exited(area: Area2D) -> void:
+	print("Player exited area.")
+
 # Function handles the enemies health based off the damage the player inflicts.
 func take_damage(damage):
 	health -= damage

@@ -109,3 +109,6 @@ func set_damage(attack_type):
 		current_damage_to_deal = 8
 	
 	Global.playerDamageAmount = current_damage_to_deal
+
+func player():
+	pass

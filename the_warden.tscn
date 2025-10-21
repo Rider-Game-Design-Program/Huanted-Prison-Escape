@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=3 uid="uid://vqh60gk0hi5d"]
 
+[ext_resource type="PackedScene" uid="uid://b22xkrr6f742s" path="res://dialogue/dialogue.tscn" id="1_b0x3t"]
 [ext_resource type="Texture2D" uid="uid://da4ywao6l30y8" path="res://temp_godot_assets/Capstone Temp Tilemap Assets.png" id="1_oy2kw"]
-[ext_resource type="Script" uid="uid://cjnmx8d5b5iv4" path="res://gravity.gd" id="2_41gjg"]
 [ext_resource type="Script" uid="uid://l8orxs1iirfy" path="res://node_finite_state_machine.gd" id="3_2rho6"]
 [ext_resource type="Script" uid="uid://c1oprexcje5jv" path="res://state_machine_controller.gd" id="3_b0x3t"]
 [ext_resource type="Script" uid="uid://bp0e5k8luxiqg" path="res://idle_state.gd" id="4_da831"]
@@ -52,26 +52,22 @@ animations = [{
 size = Vector2(32, 32)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tvsdf"]
-radius = 64.0078
+radius = 129.004
 
-[node name="The Warden" type="CharacterBody2D"]
+[node name="The Warden" type="CharacterBody2D" groups=["Warden"]]
 collision_layer = 4
+collision_mask = 3
+
+[node name="Dialogue" parent="." groups=["Warden"] instance=ExtResource("1_b0x3t")]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -16)
 sprite_frames = SubResource("SpriteFrames_b0x3t")
 animation = &"Idle"
-frame = 1
-frame_progress = 0.336472
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -16)
 shape = SubResource("RectangleShape2D_oy2kw")
-
-[node name="Gravity" type="Node" parent="." node_paths=PackedStringArray("character_body_2d", "animated_sprite_2d")]
-script = ExtResource("2_41gjg")
-character_body_2d = NodePath("..")
-animated_sprite_2d = NodePath("../AnimatedSprite2D")
 
 [node name="StateMachineController" type="Node" parent="." node_paths=PackedStringArray("node_finite_state_machine")]
 script = ExtResource("3_b0x3t")
@@ -91,17 +87,26 @@ slow_down_speed = 150
 script = ExtResource("5_tvsdf")
 character_body_2d = NodePath("../..")
 animated_sprite_2d = NodePath("../../AnimatedSprite2D")
-speed = 100
+speed = 50
+max_speed = 100
+
+[node name="Timer" type="Timer" parent="StateMachine/Attack"]
+autostart = true
 
 [node name="EnemyHitBox" type="Area2D" parent="."]
 collision_layer = 4
-collision_mask = 3
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyHitBox"]
 position = Vector2(0, -16)
 shape = SubResource("CircleShape2D_tvsdf")
 debug_color = Color(0.772101, 0.443382, 0, 0.42)
 
+[connection signal="dialogue_finished" from="Dialogue" to="StateMachine/Attack" method="_on_dialogue_dialogue_finished"]
+[connection signal="timeout" from="StateMachine/Attack/Timer" to="StateMachine/Attack" method="_on_timer_timeout"]
 [connection signal="area_entered" from="EnemyHitBox" to="StateMachine/Attack" method="_on_enemy_hit_box_area_entered"]
+[connection signal="area_exited" from="EnemyHitBox" to="StateMachine/Attack" method="_on_enemy_hit_box_area_exited"]
 [connection signal="body_entered" from="EnemyHitBox" to="StateMachineController" method="_on_area_2d_body_entered"]
+[connection signal="body_entered" from="EnemyHitBox" to="StateMachine/Attack" method="_on_enemy_hit_box_body_entered"]
 [connection signal="body_exited" from="EnemyHitBox" to="StateMachineController" method="_on_area_2d_body_exited"]
+[connection signal="body_exited" from="EnemyHitBox" to="StateMachine/Attack" method="_on_enemy_hit_box_body_exited"]

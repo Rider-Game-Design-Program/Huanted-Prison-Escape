@@ -18,40 +18,65 @@ var is_enemy_chase: bool
 var is_roaming: bool
 var dead = false
 var taking_damage = false
+var dir: Vector2
 
-# Runs every frame.
-func on_process(delta: float):
+func _ready() -> void:
+	is_enemy_chase = false
+	is_roaming = true
+	print("Dialogue in ready:", $Dialogue)
+	
+
+# Runs every frame
+func _process(delta: float) -> void:
 	pass
 
 # Runs every frame.
-func on_physics_process(delta: float):
-	var direction : int
+func _physics_process(delta: float): # o.g. on_physics_process
 	
-	if health > 0:
-		
-		if character_body_2d.global_position > player.global_position:
-			animated_sprite_2d.flip_h = false
-			direction = -1
-			#print("Attack State FLip")
-		elif character_body_2d.global_position < player.global_position:
-			animated_sprite_2d.flip_h = true
-			direction = 1
+	move(delta)
+	handle_animation()
+
+func move(delta):
+	# Print statements to see enemy coords and velocity/speed.
+	#print("Dir: ", dir)
+	#print("Velocity: ", character_body_2d.velocity)
 	
-		animated_sprite_2d.play("Attack")
-	
-		character_body_2d.velocity.x += direction * speed * delta
-		character_body_2d.velocity.x = clamp(character_body_2d.velocity.x, -max_speed, max_speed)
-		character_body_2d.move_and_slide()
-		
-		# if player takes damage, knockback enemy, turn value taking_damage back to false.
-		if taking_damage == true:
-			var knockback_direction = character_body_2d.position.direction_to(player.position) * -50
+	if !dead:
+		if !taking_damage and is_enemy_chase:
+			player = Global.playerBody
+			#print("moving")
+			# Sets the velocity of the warden enemy to the direction the player character is in and
+			# applies velocity to that direction.
+			character_body_2d.velocity = character_body_2d.position.direction_to(player.position) * speed
+			dir.x = abs(character_body_2d.velocity.x) / character_body_2d.velocity.x
+		elif taking_damage:
+			var knockback_direction = character_body_2d.position.direction_to(player.position) * -80
 			character_body_2d.velocity = knockback_direction
-			print("Knockback!")
-			taking_damage = false
+		elif is_roaming == true and is_enemy_chase == false:
+			character_body_2d.velocity += dir * 200 * delta
+			#print(character_body_2d.position)
+	elif dead:
+		character_body_2d.velocity.y += 10 * delta
+		character_body_2d.velocity.x = 0
 	
-	if dead == true:
-		print("Warden is dead!")
+	#print("Velocity ", character_body_2d.velocity)
+	character_body_2d.move_and_slide()
+	handle_animation()
+
+func handle_animation():
+	var animated_sprite = $AnimatedSprite2D
+	if !dead and !taking_damage:
+		animated_sprite_2d.play("Attack")
+		if dir.x == -1:
+			animated_sprite_2d.flip_h = true
+		elif dir.x == 1:
+			animated_sprite_2d.flip_h = false
+	elif !dead and taking_damage:
+		await get_tree().create_timer(0.8).timeout
+		taking_damage = false
+	elif dead:
+		is_roaming = false
+		print("Warden is dead")
 
 # If a CharacterBody2D node enters the enemy's attack area.
 func enter():
@@ -73,7 +98,31 @@ func take_damage(damage):
 
 # If an attack area enters the enemy's attack area.
 func _on_enemy_hit_box_area_entered(area: Area2D) -> void:
-	print("player in enemy area")
+	
 	if area == Global.playerDamageZone:
 		var damage = Global.playerDamageAmount
 		take_damage(damage)
+	print(is_roaming)
+
+func _on_enemy_hit_box_area_exited(area: Area2D) -> void:
+	pass
+
+func _on_timer_timeout() -> void:
+	$Timer.wait_time = choose([1.0, 1.5, 2.0]) # adds these options to an array.
+	if !is_enemy_chase:
+		dir = choose([Vector2.RIGHT, Vector2.UP, Vector2.LEFT, Vector2.DOWN])
+		print(dir)
+
+func choose(array):
+	array.shuffle() # shuffles array.
+	return array.front() # sends back a different wait time.
+
+func _on_enemy_hit_box_body_entered(body: Node2D) -> void:
+	is_roaming = false
+	is_enemy_chase = true
+	print(is_roaming, is_enemy_chase)
+
+func _on_enemy_hit_box_body_exited(body: Node2D) -> void:
+	is_roaming = true
+	is_enemy_chase = false
+	print(is_roaming, is_enemy_chase)

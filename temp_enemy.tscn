@@ -42,3 +42,4 @@ shape = SubResource("RectangleShape2D_fjbtb")
 debug_color = Color(0, 0.151442, 0.170666, 0.42)
 
 [connection signal="area_entered" from="EnemyHitbox" to="." method="_on_enemy_hitbox_area_entered"]
+[connection signal="area_exited" from="EnemyHitbox" to="." method="_on_enemy_hitbox_area_exited"]
