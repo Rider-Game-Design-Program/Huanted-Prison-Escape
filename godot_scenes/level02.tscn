@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=4 uid="uid://30vj7gcpnfmf"]
+[gd_scene load_steps=11 format=4 uid="uid://30vj7gcpnfmf"]
 
 [ext_resource type="Script" uid="uid://c1b76bybs8xff" path="res://Scripts/level_02.gd" id="1_jyxmw"]
 [ext_resource type="Texture2D" uid="uid://da4ywao6l30y8" path="res://temp_godot_assets/Capstone Temp Tilemap Assets.png" id="2_fkeqn"]
 [ext_resource type="PackedScene" uid="uid://bhosfiv432aow" path="res://godot_scenes/player.tscn" id="3_7kvux"]
+[ext_resource type="PackedScene" uid="uid://bmai7cewj2r8q" path="res://godot_scenes/player_bullet.tscn" id="4_fkeqn"]
 [ext_resource type="PackedScene" uid="uid://bjc14d4uyv7q2" path="res://godot_scenes/warden_boss.tscn" id="4_k3bh7"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xcysq"]
@@ -94,6 +95,7 @@ tile_set = SubResource("TileSet_vfbao")
 
 [node name="Player" parent="." instance=ExtResource("3_7kvux")]
 position = Vector2(-238, 39)
+bullet_node = ExtResource("4_fkeqn")
 
 [node name="Door" type="Area2D" parent="."]
 position = Vector2(-858, -16)
