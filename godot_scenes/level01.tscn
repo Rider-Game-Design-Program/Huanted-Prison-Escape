@@ -1,11 +1,10 @@
-[gd_scene load_steps=12 format=4 uid="uid://dw8nxxmyiyqsq"]
+[gd_scene load_steps=11 format=4 uid="uid://dw8nxxmyiyqsq"]
 
-[ext_resource type="Script" uid="uid://wt5bods1l2h6" path="res://godot_scenes/level_01.gd" id="1_h3jxc"]
+[ext_resource type="Script" uid="uid://wt5bods1l2h6" path="res://Scripts/level_01.gd" id="1_h3jxc"]
 [ext_resource type="Texture2D" uid="uid://da4ywao6l30y8" path="res://temp_godot_assets/Capstone Temp Tilemap Assets.png" id="1_xogxq"]
 [ext_resource type="PackedScene" uid="uid://bhosfiv432aow" path="res://godot_scenes/player.tscn" id="2_t2i47"]
-[ext_resource type="PackedScene" uid="uid://vqh60gk0hi5d" path="res://the_warden.tscn" id="4_ddkqi"]
-[ext_resource type="PackedScene" uid="uid://b5rlj60kaok3o" path="res://temp_npc.tscn" id="4_mix1j"]
-[ext_resource type="PackedScene" uid="uid://dmf5wfectw8n6" path="res://dialogue/temp_npc_2.tscn" id="5_mix1j"]
+[ext_resource type="PackedScene" uid="uid://b5rlj60kaok3o" path="res://godot_scenes/temp_npc.tscn" id="4_mix1j"]
+[ext_resource type="PackedScene" uid="uid://dmf5wfectw8n6" path="res://godot_scenes/temp_npc_2.tscn" id="5_mix1j"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mix1j"]
 texture = ExtResource("1_xogxq")
@@ -90,8 +89,18 @@ tile_set = SubResource("TileSet_fc0fs")
 [node name="Player" parent="." instance=ExtResource("2_t2i47")]
 position = Vector2(-238, 39)
 
-[node name="The Warden" parent="." instance=ExtResource("4_ddkqi")]
+[node name="The Warden" parent="."]
+_import_path = NodePath("")
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
 position = Vector2(22, 126)
+script = null
 
 [node name="Door" type="Area2D" parent="."]
 position = Vector2(-858, -16)

@@ -12,11 +12,11 @@ config_version=5
 
 config/name="Haunted Prison Escape"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://temp_godot_assets/icon.svg"
 
 [autoload]
 
-Global="*res://global.gd"
+Global="*res://Scripts/global.gd"
 
 [global_group]
 

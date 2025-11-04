@@ -1,0 +1,44 @@
+[gd_scene load_steps=7 format=3 uid="uid://bmai7cewj2r8q"]
+
+[ext_resource type="Texture2D" uid="uid://da4ywao6l30y8" path="res://temp_godot_assets/Capstone Temp Tilemap Assets.png" id="1_fx0go"]
+[ext_resource type="Script" uid="uid://bvqltuwunl3q5" path="res://Scripts/player_bullet.gd" id="1_n6y10"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n6y10"]
+atlas = ExtResource("1_fx0go")
+region = Rect2(0, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4036h"]
+atlas = ExtResource("1_fx0go")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kmbd7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n6y10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4036h")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_28xtj"]
+size = Vector2(16, 16)
+
+[node name="Player_Bullet" type="Area2D"]
+script = ExtResource("1_n6y10")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_kmbd7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_28xtj")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

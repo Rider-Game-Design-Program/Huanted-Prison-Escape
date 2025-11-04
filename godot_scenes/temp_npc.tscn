@@ -1,0 +1,100 @@
+[gd_scene load_steps=13 format=3 uid="uid://b5rlj60kaok3o"]
+
+[ext_resource type="Script" uid="uid://14qu7qioh3op" path="res://Scripts/temp_npc.gd" id="1_nig7q"]
+[ext_resource type="Texture2D" uid="uid://da4ywao6l30y8" path="res://temp_godot_assets/Capstone Temp Tilemap Assets.png" id="1_ydg42"]
+[ext_resource type="PackedScene" uid="uid://b22xkrr6f742s" path="res://dialogue/dialogue.tscn" id="3_litkv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nig7q"]
+atlas = ExtResource("1_ydg42")
+region = Rect2(0, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_litkv"]
+atlas = ExtResource("1_ydg42")
+region = Rect2(0, 96, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4m47"]
+atlas = ExtResource("1_ydg42")
+region = Rect2(0, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gneby"]
+atlas = ExtResource("1_ydg42")
+region = Rect2(0, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0n1id"]
+atlas = ExtResource("1_ydg42")
+region = Rect2(0, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g7fd0"]
+atlas = ExtResource("1_ydg42")
+region = Rect2(0, 160, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_c4m47"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nig7q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_litkv")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c4m47")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gneby")
+}],
+"loop": true,
+"name": &"Left_Walk",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0n1id")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g7fd0")
+}],
+"loop": true,
+"name": &"Right_Walk",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ydg42"]
+size = Vector2(32, 32)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ydg42"]
+radius = 38.6394
+
+[node name="Temp NPC" type="CharacterBody2D" groups=["Glitch"]]
+script = ExtResource("1_nig7q")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_c4m47")
+animation = &"Left_Walk"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_ydg42")
+debug_color = Color(0.971679, 0, 0.4463, 0.42)
+
+[node name="Chat_Detection" type="Area2D" parent="."]
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Chat_Detection"]
+shape = SubResource("CircleShape2D_ydg42")
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true
+
+[node name="Dialogue" parent="." groups=["Glitch"] instance=ExtResource("3_litkv")]
+offset_top = 7.0
+offset_bottom = 47.0
+
+[connection signal="body_entered" from="Chat_Detection" to="." method="_on_chat_detection_body_entered"]
+[connection signal="body_exited" from="Chat_Detection" to="." method="_on_chat_detection_body_exited"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="dialogue_finished" from="Dialogue" to="." method="_on_dialogue_dialogue_finished"]

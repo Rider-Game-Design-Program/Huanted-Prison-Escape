@@ -1,10 +1,10 @@
 [gd_scene load_steps=38 format=3 uid="uid://bhosfiv432aow"]
 
-[ext_resource type="Script" uid="uid://c4m4duv44a011" path="res://godot_scenes/player.gd" id="1_5jnm2"]
-[ext_resource type="Texture2D" uid="uid://55hci4htmjuy" path="res://Godot Art Assets/PrisonerSpriteShee.png" id="2_5jnm2"]
-[ext_resource type="Texture2D" uid="uid://cgayftchvhise" path="res://Godot Art Assets/Sketch Jumping Animation.png" id="3_4l6cv"]
-[ext_resource type="Texture2D" uid="uid://cqr1vk61j40cc" path="res://Godot Art Assets/PrisonerPunch.png" id="3_gktdc"]
-[ext_resource type="Texture2D" uid="uid://bciii15rcaydg" path="res://Godot Art Assets/Sketch Walking Spritesheet.png" id="4_pajen"]
+[ext_resource type="Script" uid="uid://c4m4duv44a011" path="res://Scripts/player.gd" id="1_5jnm2"]
+[ext_resource type="Texture2D" uid="uid://55hci4htmjuy" path="res://mcmullen-milestone-01/Character Assets/PrisonerSpriteShee.png" id="2_5jnm2"]
+[ext_resource type="Texture2D" uid="uid://cgayftchvhise" path="res://mcmullen-milestone-01/Character Assets/Sketch Jumping Animation.png" id="3_4l6cv"]
+[ext_resource type="Texture2D" uid="uid://cqr1vk61j40cc" path="res://mcmullen-milestone-01/Character Assets/PrisonerPunch.png" id="3_gktdc"]
+[ext_resource type="Texture2D" uid="uid://bciii15rcaydg" path="res://mcmullen-milestone-01/Character Assets/Sketch Walking Spritesheet.png" id="4_pajen"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gktdc"]
 atlas = ExtResource("2_5jnm2")
@@ -240,7 +240,7 @@ radius = 7.0
 
 [node name="Player" type="CharacterBody2D" groups=["Player"]]
 collision_layer = 2
-collision_mask = 5
+collision_mask = 13
 script = ExtResource("1_5jnm2")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

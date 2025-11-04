@@ -1,0 +1,42 @@
+[gd_scene load_steps=7 format=3 uid="uid://iidcvks54y1c"]
+
+[ext_resource type="Script" uid="uid://cbuj1rfnwct46" path="res://godot_scenes/warden_bullet.gd" id="1_c1h34"]
+[ext_resource type="Texture2D" uid="uid://da4ywao6l30y8" path="res://temp_godot_assets/Capstone Temp Tilemap Assets.png" id="1_p1qxv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c1h34"]
+atlas = ExtResource("1_p1qxv")
+region = Rect2(0, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_60yxu"]
+atlas = ExtResource("1_p1qxv")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rukeb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c1h34")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_60yxu")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l8b4c"]
+size = Vector2(16, 16)
+
+[node name="Bullet" type="Area2D"]
+script = ExtResource("1_c1h34")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_rukeb")
+autoplay = "default"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_l8b4c")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
