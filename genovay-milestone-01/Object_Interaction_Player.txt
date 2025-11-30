@@ -1,0 +1,116 @@
+extends Control
+
+signal object_interaction_finished
+
+@export_file("*.json") var object_file
+
+var object = []
+var current_object_dialogue_id = 0
+var object_active = false
+
+func _ready() -> void:
+	$NinePatchRect.visible = false
+
+func start():
+	if object:
+		return
+	object_active = true
+	$NinePatchRect.visible = true
+	object = load_dialogue()
+	current_object_dialogue_id = -1
+	next_script()
+
+func load_dialogue():
+	if is_in_group("Glitch's Phone"):
+		var file = FileAccess.open("res://object_interaction/glitch_cell_phone.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Glitch's Ointment"):
+		var file = FileAccess.open("res://object_interaction/glitch_ointment_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Warden's Newspaper"):
+		var file = FileAccess.open("res://object_interaction/Warden_newspaper.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Diary"):
+		var file = FileAccess.open("res://object_interaction/diary.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Prison Blueprints"):
+		var file = FileAccess.open("res://object_interaction/prison_blueprints.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Ghost_Diamond"):
+		var file = FileAccess.open("res://object_interaction/ghost_diamond.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Threat Note"):
+		var file = FileAccess.open("res://object_interaction/threat_note.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Photo"):
+		var file = FileAccess.open("res://object_interaction/photo_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Warden Certificate"):
+		var file = FileAccess.open("res://object_interaction/certificate_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Ghost Cash"):
+		var file = FileAccess.open("res://object_interaction/ghost_cash.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Ghost Cash Bag"):
+		var file = FileAccess.open("res://object_interaction/ghost_cash_bag.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Sketch File"):
+		var file = FileAccess.open("res://object_interaction/sketch_collectible_file.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Vanessa Possum Plush"):
+		var file = FileAccess.open("res://object_interaction/vanessa_possum_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Johelle Tablet"):
+		var file = FileAccess.open("res://object_interaction/johelle_tablet_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Rj Lighter"):
+		var file = FileAccess.open("res://object_interaction/rj_lighter_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Edwin Headphones"):
+		var file = FileAccess.open("res://object_interaction/edwin_headphone_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Joseph Controller"):
+		var file = FileAccess.open("res://object_interaction/joseph_controller_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Glitch's Letter"):
+		var file = FileAccess.open("res://object_interaction/glitch_letter_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	elif is_in_group("Glitch File"):
+		var file = FileAccess.open("res://object_interaction/glitch_prison_file_dialogue.json", FileAccess.READ)
+		var content = JSON.parse_string(file.get_as_text())
+		return content
+	
+func _input(event: InputEvent) -> void:
+	if !object_active:
+		return
+	if event.is_action_pressed("ui_accept"): # Use enter key.
+		next_script()
+
+func next_script():
+	current_object_dialogue_id += 1
+	if current_object_dialogue_id >= len(object):
+		object_active = false
+		$NinePatchRect.visible = false
+		emit_signal("object_interaction_finished")
+		return
+	
+	$NinePatchRect/ItemName.text = object[current_object_dialogue_id]['item name']
+	$NinePatchRect/Text.text = object[current_object_dialogue_id]['text']
