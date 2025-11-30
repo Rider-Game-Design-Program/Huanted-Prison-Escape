@@ -1,0 +1,70 @@
+extends CharacterBody2D
+class_name WardenBoss
+
+# NOTE: Warden Boss is on layer 4, with no mask.
+# The Warden's Play Detection node is on layer 3 and detects nodes on layer 2 (Mask 2).
+
+
+# Gets the player and sprite nodes.
+@onready var player = get_parent().find_child("Player")
+@onready var animated_sprite_2d = $AnimatedSprite2D
+@onready var progress_bar = $UI/ProgressBar
+@export var gun_sprite: AnimatedSprite2D
+var can_take_damage: bool
+var direction: Vector2 # Update progress bar using setter variable.
+
+var defense = 0
+
+var health = 100:
+	set(value):
+		health = value
+		progress_bar.value = value
+		
+		if value <= 0: # If health is less than 0, switch to Death state.
+			progress_bar.visible = false
+			find_child("Finite State Machine").change_state("Death")
+		# If health is less than 50%, switch to ArmorBuff state.
+		elif value <= progress_bar.max_value / 2 and defense  == 0: 
+			defense = 5
+			find_child("Finite State Machine").change_state("ArmorBuff")
+		
+
+func _ready() -> void: # Turns off physics process for the Warden Boss right away.
+	set_physics_process(false)
+	can_take_damage = true
+
+func _process(delta: float) -> void:
+	direction = player.position - position # Updates direction based on the player's position.
+	
+	if direction.x < 0:
+		animated_sprite_2d.flip_h = true # Flips direction towards the player.
+		gun_sprite.flip_h = true
+		gun_sprite.position.x = -20 # Offsets gun to match Warden's hand position.
+	
+	else:
+		animated_sprite_2d.flip_h = false
+		gun_sprite.flip_h = false
+		gun_sprite.position.x = 20 # Offsets gun to match Warden's hand position.
+		
+	take_damage()
+
+func _physics_process(delta: float) -> void: # Sets motion in physics_process
+	velocity = direction.normalized() * 40
+	move_and_collide(velocity * delta)
+
+func take_damage(): # Function that decreases health.
+	#print("Take damage active")
+	
+	if Global.warden_take_damage == true and Global.can_hit_warden == true and can_take_damage:
+		print("ouch")
+		health -= 10 - defense
+		print("Warden's Health: ", health)
+		Global.warden_take_damage = false
+		Global.can_hit_warden = false
+		take_damage_cooldown(1.0)
+	#health -= 10 - defense
+
+func take_damage_cooldown(wait_time):
+	can_take_damage = false
+	await get_tree().create_timer(wait_time).timeout
+	can_take_damage = true

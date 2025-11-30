@@ -1,0 +1,22 @@
+extends State
+
+var can_transition: bool = false # Flag Variable
+
+@export var animated_sprite_2d: AnimatedSprite2D
+
+func enter(): # Play the Glowing animation upon entering dash, change flag to true.
+	super.enter()
+	animated_sprite_2d.play("Glowing")
+	await dash()
+	can_transition = true
+
+func dash(): # Dash function to tween position.
+	var tween = create_tween()
+	tween.tween_property(owner, "position", player.position, 0.8)
+	await tween.finished
+
+func transition(): # Transition back to Follow.
+	if can_transition:
+		can_transition = false
+		
+		get_parent().change_state("Follow")

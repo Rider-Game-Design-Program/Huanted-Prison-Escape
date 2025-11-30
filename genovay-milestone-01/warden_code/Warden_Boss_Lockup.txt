@@ -1,0 +1,84 @@
+extends State
+class_name Lockup
+
+@onready var pivot = $"../../Pivot"
+var can_transition: bool = false # Flag Variable.
+
+# Assigns the Warden's AnimatedSprite2d in the inspector.
+@export var animated_sprite_2d: AnimatedSprite2D 
+
+var lockup_active: bool = false
+var stun: bool = false
+var timer: Timer # Creates timer variable
+var can_escape: bool # Bool for lockup ability to button mash and escape.
+var can_escape_int: int = 0
+
+
+func _ready() -> void:
+	pass
+
+# On enter, play Lockup animation.
+func enter():
+	Global.lockup_active = false
+	Global.can_transition = false
+	# Runs the code in the enter function in the state.gd script alongside with the code written here.
+	super.enter()
+	lockup() # Calls lockup() function
+	await animated_sprite_2d.animation_finished # Waits for "Lockup" animation to finish playing.
+	#can_transition = true # Sets can_transition equal to true after animation finishes playing.
+
+func _physics_process(delta: float) -> void:
+	
+	if Global.can_transition == true:
+		can_transition = true
+		transition()
+		Global.can_transition = false
+		print("Transition recieved")
+
+# Aims at the player.
+func set_target():
+	pivot.rotation = (owner.direction - pivot.position).angle()
+
+# Creates Lockup behavior (stuns player for 3 seconds, then lets them move again).
+func lockup():
+	timer = $Timer # Assigns the variable timer to the timer node in the Lockup node in the scene tab.
+	
+	print("Lockup function triggered")
+	Global.lockup_active = true
+	
+	
+	if Global.lockup_active == true:
+		
+		animated_sprite_2d.play("Lockup")
+		print("applied damage")
+		await animated_sprite_2d.animation_finished
+		
+		Global.player_stunned = true
+		Global.player_can_punch = false
+		
+		#Global.player_hit = true
+		#print("Global player hit variable: ", Global.player_hit)
+		
+		print("Currently playing Lockup Sprite: ")
+		
+		button_mash_enabled()
+
+	else:
+		Global.player_stunned = false
+		Global.player_can_punch = true
+		print("Not Stunned")
+
+func button_mash_enabled():
+		Global.player_can_escape = false
+		
+		#Global.player_hit = false
+		print("Button mash enabled")
+	
+
+# Allows the Warden to transition to the Dash state.
+func transition():
+	if can_transition: # If can_transition is true.
+		print("Warden transition recieved")
+		#print("Lockup Played!")
+		can_transition = false
+		get_parent().change_state("Dash")
