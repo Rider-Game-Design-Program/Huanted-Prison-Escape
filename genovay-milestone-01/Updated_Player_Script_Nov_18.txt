@@ -1,0 +1,318 @@
+extends CharacterBody2D
+class_name Sketch
+
+# Player speed variables
+var normal_speed = 280.0 # Credit to Vanessa.
+var boosted_speed = 560 # Credit to Vanessa.
+var speed: int # Credit to Vanessa.
+const JUMP_VELOCITY = -650 # o.g. -400
+
+# Glitch Buff Variables:
+var is_boosted: bool = false # Credit to Vanessa.
+var cooldown: bool = false # Credit to Vanessa.
+
+
+var attack_type: String
+var current_attack: bool
+var can_take_damage: bool
+var player_dead: bool
+var can_input: bool = true
+var can_drop: bool = false
+
+@onready var deal_damage_zone = $AttackArea
+@onready var sketch_camera = $Camera2D
+@onready var sketch_animated_sprite = $AnimatedSprite2D
+
+@export var bullet_node: PackedScene
+
+@export var PLATFORM_LAYER_INDEX: int = 2 # Credit to RJ
+@export var DROP_IGNORE_TIME: float = 0.15 # Credit to Rj
+@export var DROP_NUDGE_PIXELS: float = 2.0 # Credit to RJ
+
+var _original_collision_mask : int # Credit to RJ
+
+# Gets the value of gravity from project settings to be synced with Rigidbody2D nodes.
+var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+
+# Runs every frame.
+func _ready() -> void:
+	speed = normal_speed
+	
+	Global.playerBody = self
+	current_attack = false
+	Global.player_stunned = false
+	Global.player_can_escape = false # Added to stop warden from triggering on scene reload
+	Global.lockup_active = false # Added to stop warden from triggering on scene reload
+	Global.can_transition = false # Added to stop warden from triggering on scene reload
+	
+	can_take_damage = true
+	Global.player_dead = false
+	
+	_original_collision_mask = collision_mask
+	call_deferred("_apply_spawn_if_requested")
+
+# Runs every frame.
+func _physics_process(delta: float) -> void:
+	
+	Global.playerDamageZone = deal_damage_zone
+	
+	if Global.player_dead == true: 
+		$AnimatedSprite2D.play("Death")
+		return # Stops rest of code and logic from repeating if player is dead.
+	
+	if not is_on_floor():
+		velocity.y += gravity * delta # originally get_gravity() * delta
+
+	# Handle jump.
+	if Input.is_action_just_pressed("Jump") and is_on_floor(): 
+		velocity.y = JUMP_VELOCITY
+
+	# Get the input direction and handle the movement/deceleration.
+	var direction:= Input.get_axis("Left", "Right")
+	
+	if direction and !Global.player_dead: # originally just if direction:
+		velocity.x = direction * speed
+	else:
+		velocity.x = move_toward(velocity.x, 0, speed) 
+		
+	if !current_attack: # can add a weapon_equip line too for different weapons.
+		if Input.is_action_just_pressed("Punch") and Global.player_can_punch == true: # originally had and is_on_floor()
+			current_attack = true # Stops function from looping.
+			attack_type = "Single"
+			print("punch!");
+			#Global.warden_take_damage = true
+			set_damage(attack_type)
+			handle_attack_animation(attack_type)
+			#Global.warden_take_damage = false
+	
+	# Function flips sprite based off the direction the player is facing.
+	flip_sprite(direction)
+	
+	if Global.player_can_escape == true:
+		
+		Global.button_mash_int = 0
+		
+		Global.player_stunned = false
+		Global.lockup_active = false
+			
+		Global.player_can_escape = false
+		
+	if Global.player_stunned == false: 
+		
+		move_and_slide()
+		handle_movement_animation(direction)
+	
+	if Global.player_stunned == true:
+		
+		Global.can_transition = true
+		
+		$AnimatedButtonMash.visible = true
+		if $AnimatedButtonMash.visible == true:
+			$AnimatedButtonMash.play("default")
+		
+		if Input.is_action_just_pressed("Lockup_Escape"):
+			Global.button_mash_int += 1
+			Global.can_transition = false
+			
+			if Global.button_mash_int >=3:
+				
+				Global.player_can_escape = true
+				Global.player_can_punch = true
+				$AnimatedButtonMash.visible = false
+				
+	if Input.is_action_just_pressed("Boost"):
+		try_boost()
+	
+	check_attack_hitbox()
+	check_hitbox()
+	
+	if Input.is_action_just_pressed("drop") and is_on_floor() and can_input and !current_attack: # Credit to RJ
+		can_drop = true
+		$AnimatedSprite2D.play("Drop")
+		_drop_through_platform() # Credit to RJ
+	
+	#print("Player x: ", position.x)
+	
+# Function handles attack animation based off the type of attack the player is using.
+# for now the only attack is Single_Attack (our Punch).
+func handle_attack_animation(attack_type):
+	if current_attack:
+		var animation = str(attack_type, "_Attack") # 
+		#print(animation)
+		$AnimatedSprite2D.play(animation)
+		$"Player Sounds/Punch".play() # Punch sfx.
+		toggle_damage_collisions(attack_type)
+
+# Toggles AttackArea collision box on only when the player hits their attack, the collision then turns off until
+# the attack button is pressed again.
+func toggle_damage_collisions(attack_type):
+	var damage_zone_collision = deal_damage_zone.get_node("PunchCollision") #"CollisionShape2D"
+	print(damage_zone_collision.get_path())
+	var wait_time: float
+	Global.warden_take_damage = true
+	print("Warden can take damage: ", Global.warden_take_damage)
+	
+	if attack_type == "Single":
+		wait_time = 0.36 # 9 divided by 18 because the animation is 9 frames at 18fps.
+	
+	damage_zone_collision.disabled = false
+	await get_tree().create_timer(wait_time).timeout # creates a timer.
+	damage_zone_collision.disabled = true
+
+# Function handles the player's movement animation.
+# For now, it only handles the player's idle animation.
+func handle_movement_animation(direction):
+	if is_on_floor() and !current_attack: # If player is on the ground and not currently attacking
+		if !velocity: # If the player is not moving
+			$AnimatedSprite2D.play("Idle")
+		elif velocity: # If the player is moving.
+			$AnimatedSprite2D.play("Walk")
+	elif !is_on_floor() and !current_attack and !can_drop: # Plays if the character is in the air AND not attacking.
+		$AnimatedSprite2D.play("Jump")
+
+# Function Handles flipping the player sprite based off the direction the player is facing.
+func flip_sprite(direction):
+	if direction == 1:
+		$AnimatedSprite2D.flip_h = false
+		deal_damage_zone.scale.x = 1 # Keeps player's AttackArea where it is positioned in the scene.
+		
+	if direction == -1:
+		$AnimatedSprite2D.flip_h = true
+		deal_damage_zone.scale.x = -1 # Flips player's AtackArea.
+
+# Signal emits when the player attack animation has finished.
+func _on_animated_sprite_2d_animation_finished() -> void:
+	current_attack = false
+	#if can_drop == true:
+
+# Function handles the amount of damage the player inflicts based off their attack type.
+func set_damage(attack_type):
+	var current_damage_to_deal: int
+	Global.warden_take_damage = true
+	if attack_type == "Single":
+		#current_damage_to_deal = 8
+		Global.playerDamageAmount = 8
+
+func player():
+	pass
+
+func shoot(): # Spawns bullet.
+	var bullet = bullet_node.instantiate()
+	
+	bullet.position = global_position
+	bullet.direction = (get_global_mouse_position() - global_position). normalized()
+	get_tree().current_scene.call_deferred("add_child", bullet)
+
+func _input(event: InputEvent) -> void:
+	#if event.is_action_pressed("Shoot"): # Re-Activate Later for after Warden Boss Fight.
+		#shoot()
+	if event.is_action_pressed("Interact"):
+		print("Door interacted")
+
+# Function that temporarily increases the player's speed.
+func try_boost(): # Credit to Vanessa.
+	if not cooldown and not is_boosted:
+		is_boosted = true
+		cooldown = true
+		speed = boosted_speed
+		
+		print("Glitch boost activated")
+		print("New Speed: ", speed)
+	
+	await get_tree().create_timer(3.0).timeout # boost lasts 3s
+	speed = normal_speed
+	is_boosted = false
+	print("Glitch boost off")
+	
+	await get_tree().create_timer(2.0).timeout # cooldown timer of 2s
+	cooldown = false
+	print("Glitch boost ready again!")
+
+
+func check_attack_hitbox():
+	var hitbox_areas = $"AttackArea".get_overlapping_areas()
+	var damage: int
+	
+	if hitbox_areas:
+		var hitbox = hitbox_areas.front()
+		#print("Warden in hitbox")
+		
+		if hitbox.get_parent() is WardenBoss:
+			#print("Warden in hitbox")
+			Global.can_hit_warden = true
+			damage = Global.warden_damage_amount
+			#Global.can_hit_warden = false
+
+func check_hitbox():
+	
+	var hitbox_areas = $"Player Detection Area".get_overlapping_areas()
+	var damage: int
+	
+	if hitbox_areas:
+		var hitbox = hitbox_areas.front()
+		#print("Warden in hitbox")
+		
+		#if hitbox.get_parent() is WardenBoss:
+			#print("Warden in hitbox")
+			#Global.can_hit_warden = true
+			#damage = Global.warden_damage_amount
+		
+	if can_take_damage:
+		take_damage(damage)
+
+func take_damage(damage):
+	if damage != 0:
+		if Global.sketch_health > 0:
+			Global.sketch_health -= damage
+			print("Player health: ", Global.sketch_health)
+		elif Global.sketch_health <= 0:
+			Global.sketch_health = 0
+			print("Player health is: ", Global.sketch_health)
+			player_dead = true
+			handle_death_animation()
+		take_damage_cooldown(1.0)
+
+func handle_death_animation():
+	print("Played death anim played")
+
+func take_damage_cooldown(wait_time):
+	can_take_damage = false
+	await get_tree().create_timer(wait_time).timeout
+	can_take_damage = true
+
+func give_damage_cooldown(wait_time):
+	var can_give_damage: bool
+	can_give_damage = false
+	await get_tree().create_timer(wait_time).timeout
+	can_give_damage = true
+
+func _drop_through_platform() -> void: # Function Credit to RJ
+	var platform_bit := 1 << (PLATFORM_LAYER_INDEX - 1)
+	collision_mask = collision_mask & ~platform_bit
+	position.y += DROP_NUDGE_PIXELS
+	if velocity.y >= 0:
+		velocity.y = max(velocity.y, 10.0)
+	await get_tree().create_timer(DROP_IGNORE_TIME).timeout
+	collision_mask = _original_collision_mask
+	await get_tree().create_timer(0.5).timeout
+	can_drop = false	
+
+func set_input_enabled(enabled: bool) -> void: # Function Credit to RJ
+	can_input = enabled
+
+func _apply_spawn_if_requested() -> void: # Function Credit to RJ
+	if not Engine.has_singleton("Global"):
+		return
+	if Global.spawn_name == "":
+		return
+	var spawn_node: Node = get_tree().get_current_scene().find_node(Global.spawn_name, true, false)
+	if spawn_node:
+		if spawn_node is Node2D:
+			global_position = (spawn_node as Node2D).global_position
+		elif spawn_node.has_method("get_global_position"):
+			global_position = spawn_node.get_global_position()
+		else:
+			push_warning("Player: spawn node found but position couldn't be read.")
+	else:
+		push_warning("Player: spawn node '%s' not found in scene." % Global.spawn_name)
+	Global.spawn_name = ""
