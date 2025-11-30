@@ -1,0 +1,27 @@
+extends Control
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	$MainMenuBkg.size = get_viewport().get_visible_rect().size
+	$"Background Music".play()
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta: float) -> void:
+	#pass
+
+
+func _on_new_game_pressed() -> void:
+	$"MarginContainer/VBoxContainer/New Game/New Game Sound".play()
+
+# Loads level 1 when sound effect finishes playing.
+func _on_new_game_sound_finished() -> void:
+	get_tree().change_scene_to_file("res://Rj's files/New folder/level1_.tscn") #"res://godot_scenes/level_scenes/level01.tscn"
+
+func _on_quit_game_pressed() -> void:
+	$"MarginContainer/VBoxContainer/Quit Game/Quit Game Text/Quit Game Sound".play()
+
+# Quits the game once  the sound effect finishes playing.
+func _on_quit_game_sound_finished() -> void:
+	get_tree().quit()
