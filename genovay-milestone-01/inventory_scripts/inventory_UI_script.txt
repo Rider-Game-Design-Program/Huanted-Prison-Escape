@@ -1,0 +1,31 @@
+extends Control
+
+@onready var sketch_inventory: mainInventory = preload("res://godot_scenes/inventory_scenes/player_inventory.tres")
+@onready var inventory_slots: Array = $NinePatchRect/GridContainer.get_children()
+
+var inventory_open: bool = false
+
+func _ready() -> void:
+	sketch_inventory.update.connect(update_inventory_slots) # Once update signal occurs, connect to update_inventory_slots function.
+	update_inventory_slots()
+	close()
+
+# Checks all slots in players inventory (currently 12 slots). Updates UI.
+func update_inventory_slots(): 
+	for i in range(min(sketch_inventory.inventorySlots.size(), inventory_slots.size())):
+		inventory_slots[i].update(sketch_inventory.inventorySlots[i])
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("Display_Inventory"): # [I] Key
+		if inventory_open:
+			close()
+		else:
+			open()
+
+func open():
+	visible = true
+	inventory_open = true
+
+func close():
+	visible = false
+	inventory_open = false

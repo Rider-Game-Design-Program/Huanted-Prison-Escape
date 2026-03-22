@@ -1,0 +1,16 @@
+extends Panel
+
+@onready var item_icon: Sprite2D = $CenterContainer/Panel/item_display
+@onready var display_text: Label = $CenterContainer/Panel/Label
+
+func update(slot: Inventory_Slot):
+	if !slot.inventory_item: # If no item is there, show nothing.
+		item_icon.visible = false
+		display_text.visible = false
+	else:
+		item_icon.visible = true
+		item_icon.texture = slot.inventory_item.itemTexture
+		
+		if slot.item_amount > 1:
+			display_text.visible = true
+		display_text.text = str(slot.item_amount)

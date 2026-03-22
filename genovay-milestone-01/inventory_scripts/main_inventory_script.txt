@@ -1,0 +1,22 @@
+extends Resource # Extends resource to allow this inventory system to be used by the player and other NPCs
+class_name mainInventory
+
+signal update
+
+@export var inventorySlots: Array[Inventory_Slot] # Items stored in our Inventory_Slot class (inventory_slot.gd script)
+
+# If the first slot is open, add a new item to that slot. If the first slot is not open, place in
+# next open slot.
+func insert_item(item: InventoryItem):
+	var itemSlots = inventorySlots.filter(func(slot): return slot.inventory_item == item)
+	
+	if !itemSlots.is_empty():
+		itemSlots[0].item_amount += 1
+	else:
+		var emptySlots = inventorySlots.filter(func(slot): return slot.inventory_item == null)
+		
+		if !emptySlots.is_empty():
+			emptySlots[0].inventory_item = item
+			emptySlots[0].item_amount = 1
+	
+	update.emit() # Updates slot UI.
