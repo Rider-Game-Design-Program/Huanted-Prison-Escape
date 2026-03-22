@@ -1,0 +1,144 @@
+extends CharacterBody2D
+class_name Robber_Boss
+
+# Gets the player and sprite nodes.
+@onready var player = get_parent().find_child("Player")
+@onready var player_node = get_parent().get_node("Player")
+@onready var robber_sprite = $AnimatedSprite2D
+@onready var progress_bar = $UI/ProgressBar
+@onready var robber_character_body = $"."
+@onready var robber_raycast = $RayCast2D
+@onready var flip_timer = $Flip_Timer
+@onready var level_fight = Robber_Boss_Fight
+@export var robber_hitbox_area: Area2D
+
+# Referenced in test_robber_fight scene, where the player's
+# player_health_bar scene is dragged and dropped in.
+@export var player_health_scene: CharacterBody2D
+@export var player_punch_area: Area2D
+@export var player_bullet_area: Area2D
+@onready var player_scene = preload("res://godot_scenes/player_scenes/player.tscn")
+@onready var bullet_scene = preload("res://godot_scenes/player_scenes/player_bullet.tscn")
+var bullet_instance
+
+var direction: Vector2
+var SPEED = -250 # Make positive if Sprite is facing right
+var facing_right: bool = false
+var barriers_down: bool = true
+var can_take_damage: bool
+var defense = 0
+var punched: bool
+var shot: bool
+var left_hitbox: bool = true
+
+var health = 100:
+	set(value):
+		health = value
+		progress_bar.value = value
+		
+		if value <= 0: # If health is less than 0, switch to Death state.
+			progress_bar.visible = false
+			find_child("FiniteStateMachine").change_state("Death")
+		
+		# If health is less than 50%, switch to ArmorBuff state.
+		elif value <= progress_bar.max_value / 2 and defense  == 0: 
+			defense = 5
+			SPEED = -400
+			print("SPEED", SPEED)
+
+func _ready() -> void:
+	set_physics_process(false)
+	bullet_instance = bullet_scene.instantiate()
+
+func _process(delta: float) -> void: # Controls the robber's facing direction
+	if robber_raycast.is_colliding():
+		flip()
+	
+	direction = player.position - position # Updates the Robber's direction with the player's direction.
+	
+	if Global.robber_timer == true:
+		if Global.player_floor_level == 1:
+			robber_character_body.position.y = 20.0 # 15.0
+		elif Global.player_floor_level == 2:
+			robber_character_body.position.y = 162.0 # 153.93
+		elif Global.player_floor_level == 3:
+			robber_character_body.position.y = 312.0 # 297.93
+		Global.robber_timer = false
+	
+	if Global.robber_dazed == false:
+		velocity.x = SPEED
+	elif Global.robber_dazed == true:
+		velocity.x = 0
+	
+	#move_and_collide(velocity * delta)
+	move_and_slide()
+	
+	if !left_hitbox:
+		robber_hitbox_area.monitoring = false
+		await get_tree().create_timer(1.0).timeout
+		robber_hitbox_area.monitoring = true
+		
+
+func _physics_process(delta: float) -> void: # Sets the Robber's Movement
+	pass
+
+func flip():
+	facing_right = !facing_right
+	scale.x = abs(scale.x) * -1
+	
+	if facing_right:
+		SPEED = abs(SPEED) # Makes SPEED value positive
+	else:
+		SPEED = abs(SPEED) * -1 # Makes SPEED value negative
+
+# If the player enters the hitbox, deal damage to the player.
+func _on_hitbox_body_entered(body: Node2D) -> void:
+	print("Body entered.")
+	player_health_scene.apply_damage(20)
+	left_hitbox = false
+	
+	if body == player_node:
+		print("Body Entered")
+		var knockback_direction = (body.global_position - global_position).normalized()
+		body.apply_knockback(knockback_direction, 150, 0.12) # o.g. 150, 0.12
+
+func take_damage(): # Function that decreases health.
+	#if Global.robber_take_damage == true and can_take_damage:
+	if can_take_damage == true and punched == true:
+		print("ouch")
+		health -= 10 - defense
+		print("Robber's Health: ", health)
+		Global.robber_take_damage = false
+		take_damage_cooldown(2.0)
+		
+	# Robber can take shotgub damage if they aren't in the movement
+	# Or ragebait states.
+	elif can_take_damage == true and shot == true and Global.robber_still:
+		print("Boom")
+		health -= 20- defense
+		take_damage_cooldown(2.0)
+
+func take_damage_cooldown(wait_time):
+	can_take_damage = false
+	await get_tree().create_timer(wait_time).timeout
+	can_take_damage = true
+
+func _on_hitbox_area_entered(area: Area2D) -> void:
+	
+	if area == player_punch_area:
+		print("Punched")
+		can_take_damage = true
+		punched = true
+		take_damage()
+		can_take_damage = false
+		punched = false
+	else:
+		print("Shot")
+		can_take_damage = true
+		shot = true
+		take_damage()
+		can_take_damage = false
+		shot = false
+
+func _on_hitbox_body_exited(body: Node2D) -> void:
+	left_hitbox = true

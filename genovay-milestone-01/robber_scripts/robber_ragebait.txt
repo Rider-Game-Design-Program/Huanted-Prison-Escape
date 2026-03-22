@@ -1,0 +1,150 @@
+extends State
+
+@export var robber_sprite: AnimatedSprite2D
+@export var object_spawnpoint: Sprite2D
+
+var object_spawn_position: Vector2
+var bullet_node: PackedScene # Export Node
+var can_transition: bool = false # Variable Flag
+
+var resource = load("res://godot_scenes/inventory_scenes/player_inventory.tres")
+@export var inventory_resource = mainInventory
+@export var inventory_item = InventoryItem
+
+# Lighter Variables
+var lighter_resource = load("res://godot_scenes/inventory_scenes/inventory_items/zippo_lighter.tres")
+var lighter_scene = preload("res://godot_scenes/ragebait_bullets/lighter_bullet.tscn")
+var instance_lighter
+
+# Tablet Variables
+var tablet_resource = load("res://godot_scenes/inventory_scenes/inventory_items/drawing_tablet.tres")
+var tablet_scene = preload("res://godot_scenes/ragebait_bullets/tablet_bullet.tscn")
+var tablet_instance
+
+# Headphones Variables
+var headphones_resource = load("res://godot_scenes/inventory_scenes/inventory_items/headphones.tres")
+var headphones_scene = preload("res://godot_scenes/ragebait_bullets/headphones_bullet.tscn")
+var headphones_instance
+
+# Controller Variables
+var controller_resource = load("res://godot_scenes/inventory_scenes/inventory_items/xboxcontroller.tres")
+var controller_scene = preload("res://godot_scenes/ragebait_bullets/controller_bullet.tscn")
+var controller_instance
+
+# Plushie Variables
+var plushie_resource = load("res://godot_scenes/inventory_scenes/inventory_items/possum_plushie.tres")
+var plushie_scene = preload("res://godot_scenes/ragebait_bullets/plushie_bullet.tscn")
+var plushie_instance
+
+# Shotgun Variables
+var shotgun_resource = load("res://godot_scenes/inventory_scenes/inventory_items/player_shotgun.tres")
+var shotgun_scene = preload("res://godot_scenes/ragebait_bullets/whole_shotgun_bullet.tscn")
+var shotgun_instance
+
+# Diary Variables
+var diary_resource = load("res://godot_scenes/inventory_scenes/inventory_items/diary.tres")
+var diary_scene = preload("res://godot_scenes/ragebait_bullets/diary_bullet.tscn")
+var diary_instance
+
+# Blueprint Variables
+var blueprint_resource = load("res://godot_scenes/inventory_scenes/inventory_items/blueprint.tres")
+var blueprint_scene = preload("res://godot_scenes/ragebait_bullets/blueprints_bullet.tscn")
+var blueprint_instance
+
+# Photo Variables
+var photo_resource = load("res://godot_scenes/inventory_scenes/inventory_items/sketch_photo.tres")
+var photo_scene = preload("res://godot_scenes/ragebait_bullets/photo_bullet.tscn")
+var photo_instance
+
+var random_number = RandomNumberGenerator.new()
+
+func enter():
+	super.enter()
+	owner.set_physics_process(true)
+	robber_sprite.play("Ragebait")
+	await robber_sprite.animation_finished
+	object_spawn_position = object_spawnpoint.position
+	print("Spawn Position: ", object_spawn_position)
+	Global.inventory_max = Global.player_inventory_amount
+	#print("Ragebait State Entered")
+	ragebait()
+	can_transition = false
+
+func exit():
+	super.exit()
+	owner.set_physics_process(false)
+	#print("Ragebait State Exited")
+
+func ragebait():
+	
+	instance_lighter = lighter_scene.instantiate()
+	tablet_instance = tablet_scene.instantiate()
+	headphones_instance = headphones_scene.instantiate()
+	controller_instance = controller_scene.instantiate()
+	plushie_instance = plushie_scene.instantiate()
+	shotgun_instance = shotgun_scene.instantiate()
+	diary_instance = diary_scene.instantiate()
+	blueprint_instance = blueprint_scene.instantiate()
+	photo_instance = photo_scene.instantiate()
+	
+	#print("Current inventory Slot 1: ", resource.inventorySlots[0].inventory_item.itemName)
+	
+	random_number.randomize()
+	var slot_picked = (random_number.randi_range(Global.inventory_min, Global.inventory_max))
+	#print(random_number.randi_range(Global.inventory_min, Global.inventory_max))
+	#print("Slot Picked: ", slot_picked)
+	
+	if resource.inventorySlots[slot_picked].inventory_item.itemName == "Lighter":
+		#print("Lighter")
+		instance_lighter.position = object_spawn_position
+		add_child(instance_lighter)
+	elif resource.inventorySlots[slot_picked].inventory_item.itemName == "Drawing Tablet":
+		#print("Tablet")
+		tablet_instance.position = object_spawn_position
+		add_child(tablet_instance)
+	elif resource.inventorySlots[slot_picked].inventory_item.itemName == "Headphones":
+		#print("Headphones")
+		headphones_instance.position = object_spawn_position
+		add_child(headphones_instance)
+	elif resource.inventorySlots[slot_picked].inventory_item.itemName == "Controller":
+		#print("Controller")
+		controller_instance.position = object_spawn_position
+		add_child(controller_instance)
+	elif resource.inventorySlots[slot_picked].inventory_item.itemName == "Plushie":
+		#print("Plushie")
+		plushie_instance.position = object_spawn_position
+		add_child(plushie_instance)
+	elif resource.inventorySlots[slot_picked].inventory_item.itemName == "Player Shotgun":
+		#print("Plushie")
+		shotgun_instance.position = object_spawn_position
+		add_child(shotgun_instance)
+	elif resource.inventorySlots[slot_picked].inventory_item.itemName == "Diary":
+		#print("Plushie")
+		diary_instance.position = object_spawn_position
+		add_child(diary_instance)
+	elif resource.inventorySlots[slot_picked].inventory_item.itemName == "Blueprint":
+		#print("Plushie")
+		blueprint_instance.position = object_spawn_position
+		add_child(blueprint_instance)
+	elif resource.inventorySlots[slot_picked].inventory_item.itemName == "Photo":
+		#print("Plushie")
+		photo_instance.position = object_spawn_position
+		add_child(photo_instance)
+	else:
+		print("Null")
+
+func transition():
+	#print("Robber Dazed: ", Global.robber_dazed)
+	if can_transition == true:
+		can_transition = false
+		Global.robber_dazed = false
+		#Global.robber_still = false
+		get_parent().change_state("Movement")
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	can_transition = true
+	Global.robber_still = false
+	robber_sprite.play("Prep")
+	await get_tree().create_timer(2.0).timeout
+	transition()
+	#get_parent().change_state("Movement")

@@ -1,0 +1,43 @@
+extends State
+
+@export var robber_sprite: AnimatedSprite2D
+
+@onready var move_timer = $Timer
+@onready var shield_sprite = $Shield/Shield_Sprite
+@onready var shield_area = $Shield/Shield_Sprite/Shield_Area2D
+
+var attack_anim_can_play: bool
+
+func enter(): # Upon entering this state, play the IDLE animation.
+	super.enter()
+	owner.set_physics_process(true)
+	attack_anim_can_play = false
+	#print("Movement State Entered")
+	shield_sprite.visible = true
+	shield_area.monitoring = true
+	robber_sprite.play("Attack")
+	move_timer.start()
+
+func exit():
+	super.exit()
+	owner.set_physics_process(false)
+
+func transition():
+	#print("MOVEMENT TRANSITION")
+	#print("ROBBER DAZED")
+	if Global.robber_still == true: # o.g. if Global.robber_still == true
+		print("ROBBER DAZED")
+		Global.robber_dazed = true
+		shield_sprite.visible = false
+		shield_area.monitoring = false
+		#print("Robber transitioning to dazed")
+		#print("ROBBER STILL TRANSITION")
+		get_parent().change_state("Dazed")
+		#Global.robber_still = false
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	attack_anim_can_play = true
+
+
+func _on_shield_area_2d_area_entered(area: Area2D) -> void:
+	print("Area Entered")

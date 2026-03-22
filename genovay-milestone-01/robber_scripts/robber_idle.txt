@@ -1,0 +1,33 @@
+extends State
+
+@onready var player_detection_collision = $"../../Player Detection/CollisionShape2D"
+@onready var progress_bar = owner.find_child("ProgressBar")
+@export var animated_sprite: AnimatedSprite2D
+@export var timer: Timer
+
+var player_entered: bool = false:
+	set(value):
+		player_entered = value
+		player_detection_collision.set_deferred("disabled", value)
+		progress_bar.set_deferred("visible", value)
+
+func enter():
+	super.enter()
+	Global.robber_dazed = true
+	animated_sprite.play("Idle")
+
+func exit():
+	super.exit()
+
+func transition():
+	if !Global.robber_dazed: # If true, Robber transitions to movement state.
+		get_parent().change_state("Movement")
+
+func _on_player_detection_body_entered(body: Node2D) -> void:
+	animated_sprite.play("Prep")
+	player_entered = true
+	Global.robber_dazed = false
+	Global.play_robber_sfx = true
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	pass

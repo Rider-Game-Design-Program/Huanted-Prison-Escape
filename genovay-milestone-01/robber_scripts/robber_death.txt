@@ -1,0 +1,15 @@
+extends State
+class_name Robber_Death
+
+@export var animated_sprite_2d: AnimatedSprite2D
+@onready var death_sfx = $Death_Sfx
+
+func enter(): # Plays the Robber's Death animation.
+	super.enter()
+	Global.robber_dazed = true # Stops the Robber from moving.
+	animated_sprite_2d.play("Death")
+	death_sfx.play()
+	await get_tree().create_timer(1.5).timeout
+	#await animated_sprite_2d.animation_finished
+	animation_player.play("robber_slain")
+	Global.play_robber_sfx = false
