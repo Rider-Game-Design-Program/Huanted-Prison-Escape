@@ -1,0 +1,44 @@
+extends State
+class_name Warden_Dazed
+
+@export var warden_sprite: AnimatedSprite2D
+@export var warden_hitbox: CollisionShape2D
+
+@onready var timer = $Timer
+
+var warden_still: bool = false
+
+#@onready var dazed_sfx = $Dazed_Sfx
+
+func enter(): 
+	super.enter()
+	owner.set_physics_process(true)
+	#warden_still = true
+	Global.warden_dazed_timer = true
+	timer.start()
+	#warden_sprite.velocity = 0
+	#warden_sprite.play("Dazed")
+	
+	# Shrinks the hitbox area during dazed only, currently stops player from
+	# recieving damage upon hitbox contact, may want to change and create a 
+	# deal damage area so we aren't shrinking the enemy hitbox.
+	#warden_hitbox.scale.x = 0.5
+	#warden_hitbox.scale.y = 0.5
+	
+	#dazed_sfx.play()
+
+func exit():
+	super.exit()
+	owner.set_physics_process(false)
+
+func transition():
+	print("SWITCHING TO FOLLOW STATE!")
+	#if Global.robber_still == false:
+		#robber_hitbox.scale.x = 1.0
+		#robber_hitbox.scale.y = 1.0
+	get_parent().change_state("Follow")
+		#print("Transition. Robber: Dazed: ", Global.robber_dazed)
+
+func _on_timer_timeout() -> void:
+	Global.warden_dazed_timer = false
+	transition()
