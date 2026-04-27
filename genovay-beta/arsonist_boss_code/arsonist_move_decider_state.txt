@@ -1,0 +1,27 @@
+extends State
+class_name move_decider
+
+var stage_counter = 1
+
+func enter():
+	super.enter()
+	owner.set_physics_process(true)
+	#print("DECIDER STAGE ACTIVATED")
+
+func exit():
+	super.exit()
+	owner.set_physics_process(false)
+
+func transition():
+	if Global.arsonist_stage_one:
+		get_parent().change_state("Teleport_Attack")
+	elif Global.arsonist_stage_two:
+		Global.one_time_stage_2_location = true
+		stage_counter += 1
+		get_parent().change_state("Flame_Thrower")
+
+func _on_arsonist_boss_2_arsonist_middle_spawn() -> void:
+	if stage_counter <=1:
+		Global.one_time_stage_2_location = true
+	else:
+		Global.one_time_stage_2_location = false

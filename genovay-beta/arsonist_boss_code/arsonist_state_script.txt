@@ -1,0 +1,22 @@
+extends Node2D
+class_name State
+
+@onready var debug = owner.find_child("Debug")
+@onready var player = owner.get_parent().find_child("Player")
+@onready var animation_player = owner.find_child("AnimationPlayer")
+
+func _ready() -> void:
+	set_physics_process(false) # turns off physics process function
+
+func enter():
+	set_physics_process(true) # turns on physics process function
+
+func exit():
+	set_physics_process(false) # turns off physics process function
+
+func transition(): # will hold condition to switch between states
+	pass
+
+func _physics_process(delta: float) -> void: # runs the transition function.
+	transition()
+	debug.text = name # updates debug with the name of the state.

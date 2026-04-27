@@ -1,0 +1,65 @@
+extends State
+class_name flame_thrower
+
+@export var lower_left_spawn_anchor: Sprite2D
+@export var lower_right_spawn_anchor: Sprite2D
+@export var arsonist_sprite: CharacterBody2D
+@export var player_health_scene: CharacterBody2D
+
+@onready var firezone = $"../../Fire_Area"
+@onready var flamethrower_sprite = $"../../Fire_Area/Sprite2D"
+@onready var arsonist_animated_sprite = $"../../AnimatedSprite2D"
+
+var random = RandomNumberGenerator.new()
+var number: int
+var speed = 10.0
+var can_transition: bool = false
+var flame_on: bool = false
+var counter: int = 0
+var hit: bool = false
+
+func enter():
+	super.enter()
+	owner.set_physics_process(true)
+	number = random.randi_range(1, 2)
+	print(number)
+	teleport_location()
+
+func teleport_location():
+	if number == 1:
+		arsonist_animated_sprite.play("Burst")
+		arsonist_sprite.position = lower_left_spawn_anchor.position
+		await arsonist_animated_sprite.animation_finished
+		firezone.monitoring = true
+		flamethrower_sprite.visible = true
+		flamethrower_sprite.flip_h = true
+		firezone.scale.x = 1
+	elif number == 2:
+		arsonist_animated_sprite.play("Burst")
+		arsonist_sprite.position = lower_right_spawn_anchor.position
+		await arsonist_animated_sprite.animation_finished
+		firezone.monitoring = true
+		flamethrower_sprite.visible = true
+		flamethrower_sprite.flip_h = false
+		firezone.scale.x = -1
+		
+	await get_tree().create_timer(3.0).timeout
+	arsonist_animated_sprite.play("Close_Burst")
+	can_transition = true
+	transition()
+
+func exit():
+	super.exit()
+	owner.set_physics_process(false)
+
+func transition():
+	if can_transition:
+		can_transition = false
+		$"../../Dash_Sfx".play()
+		Global.can_dash = true
+		firezone.monitoring = false
+		flamethrower_sprite.visible = false
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	#transition()
+	pass

@@ -1,0 +1,140 @@
+extends CharacterBody2D
+class_name Arsonist_Boss_2
+
+# Signal Variables
+signal player_can_teleport
+signal arsonist_middle_spawn
+signal cooldown_finished
+
+# Export Variables
+@export var player_sprite: CharacterBody2D
+@export var player_health_scene: CharacterBody2D
+@export var arsonist_character_body: CharacterBody2D
+@export var bottom_left_anchor: Sprite2D
+@export var bottom_right_anchor: Sprite2D
+@export var center_spawn_anchor: Sprite2D
+
+# Onready Variables
+@onready var player_detection_area = $Player_Detection
+@onready var health_bar = $UI/ProgressBar
+@onready var fire_zone = $Fire_Area
+@onready var flamethrower_sprite = $Fire_Area/Sprite2D
+@onready var flamethrower_node = $Finite_State_Machine/Flame_Thrower
+@onready var progress_bar = $UI/ProgressBar
+@onready var flamethrower_time = $Flamethrower
+@onready var arsonist_animated_sprite = $AnimatedSprite2D
+
+# Flag Variables
+var stage_one_in_progress: bool = false
+var begin_stage_one: bool = false
+var begin_stage_two: bool = false
+var can_dash: bool = false
+var flamethrower_active: bool = false
+var direction: Vector2 # Update progress bar using setter variable.
+
+# Stats/Coordinate Variables
+var last_known_player_position: Vector2
+var speed = 10.0 
+var health = 100:
+	# At start, value = health value. 
+	set(value): 
+		#print(value)
+		health = value # Updates health value.
+		health_bar.value = value
+		progress_bar.value = value
+		
+		if value <= 0: # If health is less than 0, switch to Death state.
+			progress_bar.visible = false
+			find_child("Finite_State_Machine").change_state("Death")
+
+func _ready() -> void:
+	fire_zone.monitoring = false
+	flamethrower_sprite.visible = false
+	fire_zone.visible = true
+	Global.arsonist_stage_one = true
+	Global.arsonist_stage_two = false
+	Global.one_time_stage_2_location = false
+
+func _process(delta: float) -> void:
+	direction = player_sprite.position - position # Updates direction based on the player's position.
+	if direction.x < 0:
+		arsonist_animated_sprite.flip_h = false # Flips direction towards the player.
+		#flamethrower_sprite.flip_h = false
+		
+	else:
+			arsonist_animated_sprite.flip_h = true
+			#flamethrower_sprite.flip_h = false
+	
+	if health <= 50:
+		Global.arsonist_stage_one = false
+		Global.arsonist_stage_two = true
+		begin_stage_two = true
+		stage_one_in_progress = false
+	
+	if stage_one_in_progress:
+		if Global.last_known_player_position == player_sprite.position:
+			if Global.animation_finished:
+				emit_signal("player_can_teleport")
+				
+		if emit_signal("player_can_teleport"):
+			self.position = self.position.move_toward(Global.last_known_player_position, speed)
+			
+	if Global.can_dash:
+		if flamethrower_node.number == 1:
+			can_dash = true
+			arsonist_character_body.position = arsonist_character_body.position.move_toward(bottom_right_anchor.position, speed)
+			if arsonist_character_body.position == bottom_right_anchor.position and Global.can_dash:
+				Global.can_dash = false
+				can_dash = false
+				find_child("Finite_State_Machine").change_state("Recover")
+		elif flamethrower_node.number == 2 and Global.can_dash:
+			can_dash = true
+			Global.flame_on = false
+			arsonist_character_body.position = arsonist_character_body.position.move_toward(bottom_left_anchor.position, speed)
+			if arsonist_character_body.position == bottom_left_anchor.position:
+				Global.can_dash = false
+				can_dash = false
+				find_child("Finite_State_Machine").change_state("Recover")
+	if can_dash == false:
+		Global.can_dash = false
+
+func _on_hitbox_area_entered(area: Area2D) -> void:
+	if stage_one_in_progress:
+		health -= 10
+	else: 
+		health -= 5
+
+func stage_two():
+	if begin_stage_two:
+		begin_stage_two = false
+
+func _on_fire_area_body_entered(body: Node2D) -> void:
+	print("ENTERED")
+	flamethrower_active = true
+	player_health_scene.apply_damage(20)
+	player_sprite.position.x - 1
+	cooldown()
+
+func _on_fire_area_body_exited(body: Node2D) -> void:
+	flamethrower_active = false
+
+func _on_deal_damage_box_body_entered(body: Node2D) -> void:
+	player_health_scene.apply_damage(20)
+
+func _on_flamethrower_timeout() -> void:
+	print("TIMEOUT")
+	fire_zone.monitoring = false
+
+# Cooldown for flamethrower ability
+func cooldown():
+	await get_tree().create_timer(1.0).timeout
+	emit_signal("cooldown_finished")
+
+func _on_cooldown_finished() -> void:
+	if flamethrower_active:
+		player_health_scene.apply_damage(20)
+		cooldown()
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	Global.animation_finished = true
+	emit_signal("player_can_teleport")

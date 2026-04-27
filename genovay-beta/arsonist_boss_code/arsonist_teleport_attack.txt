@@ -1,0 +1,83 @@
+extends State
+class_name teleport_attack
+
+@export var top_left_spawn_anchor: Sprite2D
+@export var top_right_spawn_anchor: Sprite2D
+@export var bottom_left_spawn_anchor: Sprite2D
+@export var bottom_right_spawn_anchor: Sprite2D
+@export var middle_spawn_anchor: Sprite2D
+@export var arsonist_sprite: CharacterBody2D
+@export var player_sprite: CharacterBody2D
+@export var arsonist_animated_sprite: AnimatedSprite2D
+
+@onready var player_detection_area = $"../../Player_Detection"
+@onready var arsonist_node = $"../.."
+var is_idle: bool = true
+
+var random = RandomNumberGenerator.new()
+var number: int
+var speed = 10.0
+var last_known_player_position: Vector2
+var animated_finished: bool = false
+
+func enter():
+	super.enter()
+	owner.set_physics_process(true)
+	#Global.animation_finished = false
+	if is_idle:
+		arsonist_animated_sprite.play("Idle")
+	else:
+		#animated_finished = false
+		#arsonist_animated_sprite.play("Dive")
+		arsonist_animated_sprite.play("Buildup")
+		#print("Teleport attack")
+		await arsonist_animated_sprite.animation_finished
+		#arsonist_animated_sprite.play("Dive")
+		#number = random.randi_range(1, 2)
+		#print(number)
+		#await arsonist_animated_sprite.animation_finished
+		teleport_location()
+
+func teleport_location():
+	arsonist_animated_sprite.play("Dive")
+	number = random.randi_range(1, 2)
+	await arsonist_animated_sprite.animation_finished
+	#number = random.randi_range(1, 2)
+	if number == 1:
+		arsonist_sprite.position = top_left_spawn_anchor.position
+		move_to_player()
+		#await arsonist_animated_sprite.animation_finished
+	elif number == 2:
+		arsonist_sprite.position = top_right_spawn_anchor.position
+		move_to_player()
+		#await arsonist_animated_sprite.animation_finished
+	#elif number == 3:
+		#arsonist_sprite.position = bottom_right_spawn_anchor.position
+		#move_to_player()
+		#await arsonist_animated_sprite.animation_finished
+	#elif number == 4:
+		#arsonist_sprite.position = bottom_left_spawn_anchor.position
+		#move_to_player()
+		#await arsonist_animated_sprite.animation_finished
+
+func move_to_player():
+	Global.last_known_player_position = player_sprite.position
+
+func exit():
+	super.exit()
+	owner.set_physics_process(false)
+
+func transition():
+	if !is_idle:
+		get_parent().change_state("Recover")	
+	pass
+
+func _on_player_detection_body_entered(body: Node2D) -> void:
+	is_idle = false
+	arsonist_node.stage_one_in_progress = true
+	Global.play_warden_sfx = false
+	Global.play_robber_sfx = false
+	Global.play_arsonist_sfx = true
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	pass
