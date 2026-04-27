@@ -1,0 +1,103 @@
+extends Node2D
+class_name Robber_Boss_Fight
+
+@onready var floor_One = $Floor_Areas/Floor_01
+@onready var floor_Two = $Floor_Areas/Floor_02
+@onready var floor_Three = $Floor_Areas/Floor_03
+@onready var countdown = $Timer
+
+@export var player: CharacterBody2D
+@export var player_bullet_area: Area2D
+
+# Invisible Floor Barriers
+@onready var floor_one_left_barrier = $Invisible_Barriers/Floor_One/Floor_One_Left_Barrier/CollisionShape2D
+@onready var floor_two_left_barrier = $Invisible_Barriers/Floor_Two/Floor_Two_Left_Barrier/CollisionShape2D
+@onready var floor_three_left_barrier = $Invisible_Barriers/Floor_Three/Floor_Three_Left_Barrier/CollisionShape2D
+
+var current_floor: float
+var timer_finished: bool = false
+var robber_checkpoint: bool = false
+var battle_music_playing: bool = false
+var main_music_playing: bool = false
+
+func _ready() -> void:
+	if !Global.has_played:
+		LevelMusic.play_level_music()
+		Global.has_played = true
+	else:
+		pass
+	
+	#print("Global max:", Global.inventory_max)
+	Global.player_floor_level = 1
+	Global.robber_barriers_active = true
+
+func _process(delta: float) -> void:
+	if Global.play_robber_sfx and !battle_music_playing:
+		play_boss_music()
+	elif !Global.play_robber_sfx and battle_music_playing:
+		play_main_music()
+	
+	Global.bullet_spawnpoint = player_bullet_area.position
+	Global.player_floor_level = current_floor
+	
+	if Global.robber_dead:
+		floor_one_left_barrier.disabled = true
+		floor_two_left_barrier.disabled = true
+		floor_three_left_barrier.disabled = true
+	
+	if Global.robber_barriers_active == true: 
+		floor_one_left_barrier.disabled = false
+		floor_two_left_barrier.disabled = false
+		floor_three_left_barrier.disabled = false
+	
+	if Global.robber_barriers_active == false:
+		floor_one_left_barrier.disabled = true
+		floor_two_left_barrier.disabled = true
+		floor_three_left_barrier.disabled = true
+
+func _on_floor_01_body_entered(body: Node2D) -> void:
+	current_floor = 1
+
+func _on_floor_01_body_exited(body: Node2D) -> void:
+	print("Floor 1 Exited")
+
+func _on_floor_02_body_entered(body: Node2D) -> void:
+	current_floor = 2
+
+func _on_floor_02_body_exited(body: Node2D) -> void:
+	print("Floor 2 Exited")
+
+func _on_floor_03_body_entered(body: Node2D) -> void:
+	current_floor = 3
+
+func _on_floor_03_body_exited(body: Node2D) -> void:
+	print("Floor 3 Exited")
+
+func _on_timer_timeout() -> void:
+	Global.robber_barriers_active = false
+	Global.robber_timer = true
+	Global.robber_still = true
+	#print("Robber still: ", Global.robber_still)
+	robber_checkpoint = true
+	await get_tree().create_timer(5.0).timeout
+	#print("Robber Still is False: ", Global.robber_still)
+	Global.robber_still = false
+	
+	countdown.start() # Currently 30.0s.
+	Global.robber_barriers_active = true
+	robber_checkpoint = false
+
+func play_boss_music():
+	battle_music_playing = true
+	Global.play_robber_sfx = true
+	LevelMusic.play_level_music()
+
+func play_main_music():
+	battle_music_playing = false
+	main_music_playing = true
+	Global.play_robber_sfx = false
+	LevelMusic.play_level_music()
+
+
+#func _on_area_2d_body_entered(body: Node2D) -> void:
+	#pass
