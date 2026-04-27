@@ -1,0 +1,32 @@
+extends Node2D
+class_name Arsonist_Fight
+
+var battle_music_playing: bool
+var main_music_playing: bool
+
+func _ready() -> void:
+	if !Global.has_played:
+		LevelMusic.play_level_music()
+		Global.has_played = true
+	else:
+		pass
+
+func _process(delta: float) -> void:
+	if Global.play_arsonist_sfx and !battle_music_playing:
+		play_boss_music()
+	elif !Global.play_arsonist_sfx and battle_music_playing:
+		play_main_music()
+
+func _physics_process(delta: float) -> void:
+	pass
+
+func play_boss_music():
+	battle_music_playing = true
+	Global.play_arsonist_sfx = true
+	LevelMusic.play_level_music()
+
+func play_main_music():
+	battle_music_playing = false
+	main_music_playing = true
+	Global.play_arsonist_sfx = false
+	LevelMusic.play_level_music()
