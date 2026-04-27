@@ -1,0 +1,80 @@
+extends Node
+
+# Player Variables
+var playerBody: CharacterBody2D
+var player_stunned: bool
+var playerDamageZone: Area2D # So enemy can find player zone.
+var playerDamageAmount: int
+var player_can_escape: bool
+var button_mash_int: int
+var sketch_health: int = 100
+var player_hit: bool
+var player_can_punch: bool = true
+var player_dead: bool = false
+var has_shotgun: bool
+
+var unlocked_speed_boost: bool
+var antler_ability_unlocked: bool
+var can_hit_warden:bool
+
+# Warden Boss Variables.
+var warden_timer: Timer
+var lockup_active: bool
+var can_transition: bool
+var warden_take_damage: bool
+var warden_damage_amount: int
+var warden_attack_melee: bool
+var warden_fight: bool = false
+var warden_dazed: bool
+
+var lockupzone_entered: bool
+var warden_dazed_timer: bool
+
+var has_keycard: bool = false
+var spawn_name: String = "res://Rj's files/New folder/cellgen.tscn" # "res://Levels/cellgen.tscn"
+var teleportToCoordinates : Vector2
+
+var robber_timer: bool
+var player_floor_level: float
+var robber_barriers_active: bool
+var robber_dazed: bool
+var robber_still: bool
+var robber_take_damage: bool
+
+var dialogue_finished: bool
+var player_items_array = []
+var player_items_dictionary = {}
+var player_inventory_amount: int = -1
+var inventory_min: int = 0
+var inventory_max: int
+
+var bullet_spawnpoint: Vector2
+
+var current_morality: String = "Neutral"
+
+var armor_activated: bool = false
+var boss_timer_activated: bool = false
+
+var level1_door1_entered: bool = false
+var level1_door2_entered: bool = false
+var level2_door1_entered: bool = false
+var level2_door2_entered: bool = false 
+var level2_door3_entered: bool = false
+var level2_door4_entered: bool = false
+var level3_door1_entered: bool = false
+var level3_door2_entered: bool = false
+
+var has_played: bool = false
+var play_warden_sfx: bool = false
+var play_robber_sfx: bool = false
+var play_arsonist_sfx: bool = false
+var robber_dead: bool = false
+
+var last_known_player_position: Vector2
+var arsonist_can_move: bool
+var arsonist_stage_one: bool
+var arsonist_stage_two: bool
+var one_time_stage_2_location: bool
+var can_dash: bool 
+var flame_on: bool
+var animation_finished: bool
