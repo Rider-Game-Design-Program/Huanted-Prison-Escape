@@ -1,0 +1,69 @@
+extends Node2D
+
+@export var shotgun_collectible: AnimatedSprite2D 
+@export var shotgun_area: Area2D
+@export var player_bullet_area: Area2D
+@export var lockup_zone: Area2D
+@export var player_sprite: CharacterBody2D
+
+@onready var timer = $Timer
+@onready var lockup_zone_sprite = $Lockup_Zone/AnimatedSprite2D
+@onready var lockup_zone_area = $Lockup_Zone
+
+var battle_music_playing: bool = false
+var main_music_playing: bool = false
+var music_trigger: bool = false
+
+func _ready() -> void:
+	$"Door SFX".play()
+	timer.start()
+	
+	shotgun_collectible.visible = false
+	shotgun_area.visible = false
+	shotgun_area.monitoring = false
+	
+	lockup_zone_sprite.visible = false
+	lockup_zone_area.monitoring = false
+	
+	if !Global.has_played:
+		LevelMusic.play_level_music()
+		Global.has_played = true
+	else:
+		pass
+
+func _process(delta: float) -> void:
+	if Global.lockupzone_entered:
+		#print("IS IN LOCKUP ZONE")
+		pass
+	else:
+		#print("NOT IN LOCKUP ZONE!!!!")
+		pass
+	
+	if Global.warden_fight == true and battle_music_playing == false:
+		play_boss_music()
+		
+	elif !Global.warden_fight and !main_music_playing:
+		play_main_music()
+	
+	Global.bullet_spawnpoint = player_bullet_area.position
+
+func play_boss_music():
+	battle_music_playing = true
+	main_music_playing = false
+	Global.play_warden_sfx = true
+	LevelMusic.play_level_music()
+
+func play_main_music():
+	battle_music_playing = false
+	main_music_playing = true
+	Global.play_warden_sfx = false
+	LevelMusic.play_level_music()
+
+func _on_timer_timeout() -> void:
+	pass
+
+func _on_lockup_zone_body_entered(body: Node2D) -> void:
+	Global.lockupzone_entered = true
+
+func _on_lockup_zone_body_exited(body: Node2D) -> void:
+	Global.lockupzone_entered = false
